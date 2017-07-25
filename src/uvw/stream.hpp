@@ -97,7 +97,7 @@ public:
     using Deleter = void(*)(char *);
 
     WriteReq(ConstructorAccess ca, std::shared_ptr<Loop> loop, std::unique_ptr<char[], Deleter> dt, unsigned int len)
-        : Request<WriteReq, uv_write_t>{std::move(ca), std::move(loop)},
+        : Request<WriteReq, uv_write_t>{ca, std::move(loop)},
           data{std::move(dt)},
           buf{uv_buf_init(data.get(), len)}
     {}
