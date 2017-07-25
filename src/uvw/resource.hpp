@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include <type_traits>
 #include <utility>
 #include <memory>
 #include <uv.h>
@@ -71,8 +72,9 @@ protected:
         return static_cast<bool>(sPtr);
     }
 
-public:
-    explicit Resource(ConstructorAccess, std::shared_ptr<Loop> ref)
+private:
+    template<typename C = U, typename = std::enable_if_t<decltype(&C::data, std::true_type{})::value>>
+    explicit Resource(int, std::shared_ptr<Loop> ref)
         : Emitter<T>{},
           std::enable_shared_from_this<T>{},
           pLoop{std::move(ref)},
@@ -80,6 +82,19 @@ public:
     {
         resource.data = static_cast<T*>(this);
     }
+
+    template<typename C = U>
+    explicit Resource(char, std::shared_ptr<Loop> ref)
+        : Emitter<T>{},
+          std::enable_shared_from_this<T>{},
+          pLoop{std::move(ref)},
+          resource{}
+    {}
+
+public:
+    explicit Resource(ConstructorAccess, std::shared_ptr<Loop> ref)
+        : Resource{0, std::move(ref)}
+    {}
 
     Resource(const Resource &) = delete;
     Resource(Resource &&) = delete;
